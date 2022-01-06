@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
+use App\Services\CheckExtensionServices;
+use App\Services\FileUploadServices;
 
 class RegisterController extends Controller
 {
@@ -68,30 +70,10 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         $imageFile = $data['img_name'];
-        $filenameWithExt = $imageFile->getClientOriginalName();
-        $fileName = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-        $extension = $imageFile->getClientOriginalExtension();
-        // ファイル名が一意になるように時刻を含める
-        $fileNameToStore = $fileName.'_'.time().'.'.$extension;
+        $list = FileUploadServices::fileUpload($imageFile);
+        list($extension, $fileNameToStore, $fileData) = $list;
 
-        $fileData = file_get_contents($imageFile->getRealPath());
-
-        // 拡張子ごとにbase64エンコード
-        if ($extension = 'jpg'){
-            $data_url = 'data:image/jpg;base64,'. base64_encode($fileData);
-        }
-    
-        if ($extension = 'jpeg'){
-        $data_url = 'data:image/jpg;base64,'. base64_encode($fileData);
-        }
-
-        if ($extension = 'png'){
-        $data_url = 'data:image/png;base64,'. base64_encode($fileData);
-        }
-
-        if ($extension = 'gif'){
-        $data_url = 'data:image/gif;base64,'. base64_encode($fileData);
-        }
+        $data_url = CheckExtensionServices::checkExtension($fileData, $extension);
 
         $image = Image::make($data_url);
         // 画像をリサイズして保存
