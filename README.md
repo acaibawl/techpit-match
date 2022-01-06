@@ -8,3 +8,7 @@ databaseディレクトリ配下に"database.sqlite"を追加して、sqliteで�
 
 日本語リソースファイルDL元  
 https://github.com/minoryorg/laravel-resources-lang-ja/tree/master/resources/lang/ja
+
+## PHPの画像リサイズライブラリのインストール
+Ubuntuでphp7.4環境の場合
+```sudo apt-get install php7.4-gd```

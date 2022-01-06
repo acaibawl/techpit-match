@@ -8,6 +8,7 @@ use App\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Intervention\Image\Facades\Image;
 
 class RegisterController extends Controller
 {
@@ -53,6 +54,8 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'img_name' => ['file', 'image', 'mimes:jepg,png,jpg,gif', 'max:2000'],
+            'self_introduction' => ['string', 'max:255'],
         ]);
     }
 
@@ -64,13 +67,43 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        $imageFile = $data['img_name'];
+        $filenameWithExt = $imageFile->getClientOriginalName();
+        $fileName = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+        $extension = $imageFile->getClientOriginalExtension();
+        // ファイル名が一意になるように時刻を含める
+        $fileNameToStore = $fileName.'_'.time().'.'.$extension;
+
+        $fileData = file_get_contents($imageFile->getRealPath());
+
+        // 拡張子ごとにbase64エンコード
+        if ($extension = 'jpg'){
+            $data_url = 'data:image/jpg;base64,'. base64_encode($fileData);
+        }
+    
+        if ($extension = 'jpeg'){
+        $data_url = 'data:image/jpg;base64,'. base64_encode($fileData);
+        }
+
+        if ($extension = 'png'){
+        $data_url = 'data:image/png;base64,'. base64_encode($fileData);
+        }
+
+        if ($extension = 'gif'){
+        $data_url = 'data:image/gif;base64,'. base64_encode($fileData);
+        }
+
+        $image = Image::make($data_url);
+        // 画像をリサイズして保存
+        $image->resize(400, 400)->save(storage_path() . '/app/public/images/' . $fileNameToStore);
+
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'self_introduction' => $data['self_introduction'],
             'sex' => $data['sex'],
-            'img_name' => $data['img_name'],
+            'img_name' => $fileNameToStore,
         ]);
     }
 }
