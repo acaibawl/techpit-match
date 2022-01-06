@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Request\ProfileRequest;
 use App\User;
 use Intervention\Image\Facades\Image;
 
@@ -23,7 +24,7 @@ class UserController extends Controller
         return view('users.edit', compact('user'));
     }
 
-    public function update(Request $request, $id)
+    public function update(ProfileRequest $request, $id)
     {
         $user = User::findorFail($id);
 
