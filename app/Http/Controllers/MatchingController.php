@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Reaction;
 use App\User;
+use App\Constants\Status;
 use Auth;
 
 class MatchingController extends Controller
